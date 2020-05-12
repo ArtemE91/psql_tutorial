@@ -1,0 +1,225 @@
+---
+
+customer:
+  id: 'serial primary key'
+  name: 'varchar(255)'
+  phone: 'varchar(30)'
+  email: 'varchar(255)'
+  create: 'CREATE TABLE customer(id SERIAL PRIMARY KEY,name VARCHAR(255), phone(varchar(30)), email VARCHAR(255));'
+
+#mydb=# \d customer
+#                                    Table "public.customer"
+# Column |          Type          | Collation | Nullable |               Default
+#--------+------------------------+-----------+----------+--------------------------------------
+# id     | integer                |           | not null | nextval('customer_id_seq'::regclass)
+# name   | character varying(255) |           |          |
+# phone  | character varying(30)  |           |          |
+# email  | character varying(255) |           |          |
+#Indexes:
+#    "customer_pkey" PRIMARY KEY, btree (id)
+#Referenced by:
+#    TABLE "cart" CONSTRAINT "cart_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customer(id)
+
+  insert: "INSERT INTO customer (name, phone, email)
+           VALUES ('alex', '89991234356', 'alex@gmail.com'),
+                  ('bob', '+79274351232', 'bob@gmail.com'),
+                  ('John', '84325647382', 'john@mail.ru'),
+                  ('Anton', '273-12-324', 'anton@yandec.ru'),
+                  ('Niko', '+79113248721', 'niko@icloud.com'),
+                  ('George', '89234567465', 'george@mail.ru');"
+
+#mydb=# select * from customer;
+# id |  name  |    phone     |      email
+#----+--------+--------------+-----------------
+#  1 | alex   | 89991234356  | alex@gmail.com
+#  2 | bob    | +79274351232 | bob@gmail.com
+#  3 | John   | 84325647382  | john@mail.ru
+#  4 | Anton  | 273-12-324   | anton@yandec.ru
+#  5 | Niko   | +79113248721 | niko@icloud.com
+#  6 | George | 89234567465  | george@mail.ru
+
+
+product:
+  id: 'serial primary key'
+  name: 'varchar(255)'
+  description: 'text'
+  price: 'integer'
+  create: 'CREATE TABLE product(id SERIAL PRIMARY KEY, name VARCHAR(255), description TEXT, price INTEGER);'
+
+#mydb=# \d product
+#  Table "public.product"
+#  Column    |          Type          | Collation | Nullable |               Default
+#  -------------+------------------------+-----------+----------+-------------------------------------
+#  id          | integer                |           | not null | nextval('product_id_seq'::regclass)
+#  name        | character varying(255) |           |          |
+#  description | text                   |           |          |
+#  price       | integer                |           |          |
+#  Indexes:
+#      "product_pkey" PRIMARY KEY, btree (id)
+  insert: "INSERT INTO product (name, price)
+           VALUES ('iphone 6S', 25000),
+                  ('iphone XR', 40000),
+                  ('iphone 11', 57000),
+                  ('Samsung Note 10', 60000),
+                  ('Mac Air 13', 70000),
+                  ('Mac pro 15', 95000),
+                  ('Apple TV 4', 12000),
+                  ('PS4 Slim 512Gb', 25000);"
+
+#mydb=# select * from product;
+#  id |      name       | description | price
+#  ----+-----------------+-------------+-------
+#  1 | iphone 6S       |             | 25000
+#  2 | iphone XR       |             | 40000
+#  3 | iphone 11       |             | 57000
+#  4 | Samsung Note 10 |             | 60000
+#  5 | Mac Air 13      |             | 70000
+#  6 | Mac pro 15      |             | 95000
+#  7 | Apple TV 4      |             | 12000
+#  8 | PS4 Slim 512Gb  |             | 25000
+#  (8 rows)
+
+
+
+product_photo:
+  id: 'serial primary key'
+  url: 'varchar(255)'
+  product_id: 'references product(id)'
+  create: 'CREATE TABLE product_photo(id SERIAL PRIMARY KEY, url VARCHAR(255), product_id INTEGER REFERENCES product(id));'
+
+#mydb=# \d product_photo
+#                                      Table "public.product_photo"
+#   Column   |          Type          | Collation | Nullable |                  Default
+#------------+------------------------+-----------+----------+-------------------------------------------
+# id         | integer                |           | not null | nextval('product_photo_id_seq'::regclass)
+# url        | character varying(255) |           |          |
+# product_id | integer                |           |          |
+#Indexes:
+#    "product_photo_pkey" PRIMARY KEY, btree (id)
+#Foreign-key constraints:
+#    "product_photo_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+  insert: "INSERT INTO product_photo (url, product_id)
+           VALUES ('iphone6s_photo', 1),
+                  ('iphone11_photo', 3),
+                  ('mac_pro15_photo', 6),
+                  ('ps4_slim_photo', 8);"
+
+#  mydb=# select * from product_photo;
+#  id |       url       | product_id
+#  ----+-----------------+------------
+#  1 | iphone6s_photo  |          1
+#  2 | iphone11_photo  |          3
+#  3 | mac_pro15_photo |          6
+#  4 | ps4_slim_photo  |          8
+#  (4 rows)
+
+
+cart:
+  id: 'serial primary key'
+  customer_id: 'integer references customer(id)'
+  create: 'CREATE TABLE cart(id SERIAL PRIMARY KEY, customer_id INTEGER REFERENCES customer(id));'
+
+#mydb=# \d cart
+#  Table "public.cart"
+#  Column    |  Type   | Collation | Nullable |             Default
+#  -------------+---------+-----------+----------+----------------------------------
+#  id          | integer |           | not null | nextval('cart_id_seq'::regclass)
+#  customer_id | integer |           |          |
+#  Indexes:
+#      "cart_pkey" PRIMARY KEY, btree (id)
+#  Foreign-key constraints:
+#      "cart_customer_id_fkey" FOREIGN KEY (customer_id) REFERENCES customer(id)
+
+  insert: "INSERT INTO cart (customer_id)
+           VALUES (1), (3), (5), (1), (2), (2), (4);"
+
+cart_product:
+  cart_id: 'integer references cart(id)'
+  product_id: 'integer references product(id)'
+  create: 'CREATE TABLE cart_product(cart_id INTEGER REFERENCES cart(id), product_id INTEGER REFERENCES product(id));'
+
+#mydb=# \d cart_product
+#              Table "public.cart_product"
+#   Column   |  Type   | Collation | Nullable | Default
+#------------+---------+-----------+----------+---------
+# cart_id    | integer |           |          |
+# product_id | integer |           |          |
+#Foreign-key constraints:
+#    "cart_product_cart_id_fkey" FOREIGN KEY (cart_id) REFERENCES cart(id)
+#    "cart_product_product_id_fkey" FOREIGN KEY (product_id) REFERENCES product(id)
+
+  insert: "INSERT INTO cart_product (cart_id, product_id)
+           VALUES (1, 2), (2, 3), (3, 5), (4, 8), (5, 1), (6, 7), (7, 6);"
+
+
+join:
+  # Вывести имя аккаунта, имя продукта, цена продукта
+  join_1: "select c.name, p.name as product_name, p.price as product_price
+           from customer as c
+           left join cart on c.id=cart.customer_id
+           left join cart_product as cp on cp.cart_id=cart.id
+           left join product as p on cp.product_id=p.id;"
+
+# name  |  product_name  | product_price
+#-------+----------------+---------------
+# alex  | iphone XR      |         40000
+# John  | iphone 11      |         57000
+# Niko  | Mac Air 13     |         70000
+# alex  | PS4 Slim 512Gb |         25000
+# bob   | iphone 6S      |         25000
+# bob   | Apple TV 4     |         12000
+# Anton | Mac pro 15     |         95000
+
+  # Сгруппировать по имени аккаунта
+  group_join_1: "select c.name, coalesce(sum(p.price), 0) as product_price from customer as c
+                 left join cart on c.id=cart.customer_id
+                 left join cart_product as cp on cp.cart_id=cart.id
+                 left join product as p on cp.product_id=p.id
+                 group by c.name;"
+
+  #  name  | product_price
+  #--------+---------------
+  # Niko   |         70000
+  # Anton  |         95000
+  # John   |         57000
+  # bob    |         37000
+  # George |             0
+  # alex   |         65000
+
+  # Сортировка по сумме заказов
+  sort_join_1: '{group_join_1} order by product_price desc;'
+
+#  name  | product_price
+#  --------+---------------
+#  Anton  |         95000
+#  Niko   |         70000
+#  alex   |         65000
+#  John   |         57000
+#  bob    |         37000
+#  George |             0
+
+  # Выборка having(сортировка групп)
+  having_join_1: '{group_join_1} having sum(p.price)>0 order by product_price desc'
+
+# name  | product_price
+#-------+---------------
+# Anton |         95000
+# Niko  |         70000
+# alex  |         65000
+# John  |         57000
+# bob   |         37000
+
+  limit_join_1: '{having_join_1} limit 2'
+
+# name  | product_price
+#-------+---------------
+# Anton |         95000
+# Niko  |         70000
+
+  offset_join_1: '{limit_join_1} offset 2'
+
+# name | product_price
+#------+---------------
+# alex |         65000
+# John |         57000
